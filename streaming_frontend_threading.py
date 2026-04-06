@@ -108,3 +108,4 @@ if user_input:
         'role': 'assistant',
         'content': full_response
     })
+
