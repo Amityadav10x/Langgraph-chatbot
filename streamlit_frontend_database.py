@@ -3,7 +3,7 @@ import uuid
 import os
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
-from langgrpah_database_backend import chatbot, retrieve_all_threads, get_chat_history
+from langgraph_tool_backend import chatbot, retrieve_all_threads, get_chat_history
 
 # --- LOAD ENV ---
 load_dotenv()
@@ -55,7 +55,7 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # 2. AI response (streaming + tracing config)
+    # 2. AI response (STREAMING + YOUR CONFIG KEPT)
     with st.chat_message("assistant"):
         placeholder = st.empty()
         full_response = ""
@@ -63,19 +63,25 @@ if user_input:
         config = {
             "configurable": {"thread_id": current_tid},
             "tags": ["streamlit", "chatbot"],
-            "metadata": {"source": "ui"}
+            "metadata": {"source": "ui"},
+            "run_name": "User Chat Request"
         }
 
-        for chunk, _ in chatbot.stream(
-            {"messages": [HumanMessage(content=user_input)]},
-            config=config,
-            stream_mode="messages"
-        ):
-            if chunk.content:
-                full_response += chunk.content
-                placeholder.markdown(full_response + "▌")
+        try:
+            for chunk, _ in chatbot.stream(
+                {"messages": [HumanMessage(content=user_input)]},
+                config=config,
+                stream_mode="messages"
+            ):
+                if chunk.content:
+                    full_response += chunk.content
+                    placeholder.markdown(full_response + "▌")
 
-        placeholder.markdown(full_response)
+            placeholder.markdown(full_response)
+
+        except Exception as e:
+            placeholder.markdown("❌ Error generating response")
+            print("STREAM ERROR:", e)
 
     # 3. Save response
     st.session_state['store'][current_tid].append({

@@ -19,6 +19,6 @@ venv/
 # LangGraph / DB
 *.db
 
-# OS
+# OSgit add .gitignore
 .DS_Store
 Thumbs.db
