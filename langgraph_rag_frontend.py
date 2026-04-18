@@ -79,6 +79,7 @@ for msg in st.session_state.chat_history:
         st.markdown(msg["content"])
 
 # --- 5. User Interaction & Streaming ---
+# --- 5. User Interaction & Streaming ---
 if prompt := st.chat_input("Ask about the PDF or perform a calculation..."):
     # Immediate UI update for user message
     st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -88,24 +89,23 @@ if prompt := st.chat_input("Ask about the PDF or perform a calculation..."):
     # Process AI Response
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
-        full_response = ""
+        full_response = "" 
 
-        async def run_agent():
-            config = {"configurable": {"thread_id": st.session_state.thread_id}}
-            inputs = {"messages": [("user", prompt)]}
-            
-            # Use 'astream' for that 'live' feeling
-            async for event in chatbot.astream(inputs, config=config, stream_mode="values"):
-                if event["messages"]:
-                    last_msg = event["messages"][-1]
-                    # Ensure we only stream text content, not tool metadata
-                    if last_msg.type == "ai" and last_msg.content:
-                        full_response = last_msg.content
-                        response_placeholder.markdown(full_response + "▌")
-            
-            response_placeholder.markdown(full_response)
-
-        asyncio.run(run_agent())
+        config = {"configurable": {"thread_id": st.session_state.thread_id}}
+        inputs = {"messages": [("user", prompt)]}
+        
+        # KEY CHANGE: Use standard .stream() instead of async
+        # We don't need 'asyncio.run' or 'async def' anymore!
+        for event in chatbot.stream(inputs, config=config, stream_mode="values"):
+            if event.get("messages"):
+                last_msg = event["messages"][-1]
+                # Ensure we only stream text content, not tool metadata
+                if last_msg.type == "ai" and last_msg.content:
+                    full_response = last_msg.content
+                    response_placeholder.markdown(full_response + "▌")
+        
+        # Final render without the blinking cursor block
+        response_placeholder.markdown(full_response)
         
         # Save the AI response to session state history
         if full_response:
