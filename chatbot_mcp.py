@@ -11,7 +11,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 # 1. Define the State
 class State(TypedDict):
     messages: Annotated[list, add_messages]
-
+    
 async def main():
     # 2. Configure MCP Server (Ensure path to math_server.py is correct)
     server_script_path = os.path.abspath("math_server.py")
